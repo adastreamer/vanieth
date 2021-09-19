@@ -182,7 +182,7 @@ func main() {
 					balance, _ := client.BalanceAt(context.Background(), account, nil)
 					bal := FP(balance, 18)
 					if (bal > 0) {
-						fmt.Printf("\r%s\n", string(j))
+						fmt.Printf("\r%s: %f\n", string(j), bal)
 					}
 					rated = false
 				}
