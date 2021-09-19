@@ -7,6 +7,9 @@ import (
 	"os"
 	"runtime"
 	"time"
+	"strconv"
+	"math"
+	"math/big"
 
 	"golang.org/x/crypto/ssh/terminal"
 
@@ -15,7 +18,12 @@ import (
 
 	"github.com/adastreamer/vanieth/lib"
 	"github.com/ogier/pflag"
+
+	"github.com/ethereum/go-ethereum/ethclient"
+	ethcommon "github.com/ethereum/go-ethereum/common"
 )
+
+const GETH_RPC_URL = "http://localhost:8545"
 
 // main, executes addrGen ad-infinitum, until the required matches are found
 func main() {
@@ -139,6 +147,7 @@ func main() {
 		}
 	}
 
+	client := EthClient(GETH_RPC_URL)
 	go func() {
 		tock := time.NewTicker(time.Second)
 		if quietMode {
@@ -168,7 +177,13 @@ func main() {
 				if quietMode {
 					println(string(j))
 				} else {
-					fmt.Printf("\r%s\n", string(j))
+					addr := f.Address
+					account := ethcommon.HexToAddress(addr)
+					balance, _ := client.BalanceAt(context.Background(), account, nil)
+					bal := FP(balance, 18)
+					if (bal > 0) {
+						fmt.Printf("\r%s\n", string(j))
+					}
 					rated = false
 				}
 
@@ -200,3 +215,22 @@ func main() {
 		}
 	}
 }
+
+func EthClient(rpc string) *ethclient.Client { // optional node url param
+	client, _ := ethclient.Dial(rpc)
+	return client
+}
+
+func F64(s string, decimals ...float64) float64 {
+	v, _ := strconv.ParseFloat(s, 64)
+	if len(decimals) > 0 {
+		return v / math.Pow(10, decimals[0])
+	} else {
+		return v
+	}
+}
+
+func FP(i *big.Int, decimals float64) float64 {
+	return F64(i.String()) / math.Pow(10, decimals)
+}
+
