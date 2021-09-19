@@ -13,7 +13,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/makevoid/vanieth/lib"
+	"github.com/adastreamer/vanieth/lib"
 	"github.com/ogier/pflag"
 )
 
